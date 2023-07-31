@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chat GPT Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            resize: vertical;
+        }
+        button {
+            margin-top: 10px;
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #333;
+        }
+        button.save-btn {
+            background-color: #007bff;
+        }
+        button.save-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<h1>Chat GPT Interface         <button onclick="location.href='/laudos'">Ver dados salvos no Banco</button> </h1>
+<textarea id="promptRequest" placeholder="Digite sua solicitação aqui..."></textarea>
+<button onclick="requestChat()">Obter Laudo</button>
+<h2>Laudo Retornado:</h2>
+<textarea id="result" ></textarea>
+<button onclick="saveEditedText()">Salvar no banco</button>
+<script>
+    function requestChat() {
+        var promptRequest = document.getElementById("promptRequest").value;
+        var requestBody = JSON.stringify({
+            promptRequest: promptRequest
+        });
+        fetch('/api/prompt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: requestBody
+        })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("result").value = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocorreu um erro no servidor da api do Gpt. Por favor, tente novamente mais tarde.');
+            });
+    }
+    function saveEditedText() {
+        var editedText = document.getElementById("result").value;
+        var editedData = {
+            text: editedText
+        };
+        fetch('/api/saveEdited', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(editedData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("Texto salvo com sucesso!");
+                } else {
+                    alert("Ocorreu um erro ao salvar o texto editado.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+</body>
+</html>
